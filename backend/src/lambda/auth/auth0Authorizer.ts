@@ -3,7 +3,7 @@ import { APIGatewayTokenAuthorizerEvent, CustomAuthorizerResult } from 'aws-lamb
 import * as AWS from 'aws-sdk';
 import { verify , decode, JsonWebTokenError } from 'jsonwebtoken'
 import { createLogger } from '../../utils/logger'
-import { Jwt } from '../../auth/Jwt'
+import { getToken } from '../../auth/utils';
 import { JwtPayload } from '../../auth/JwtPayload'
 
 const logger = createLogger('auth')
@@ -52,29 +52,10 @@ export const handler = async (
 }
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
-  if (!authHeader) {
-    throw new Error('Invalid Auth Header');
-  }
-  if (!authHeader.toLocaleLowerCase().startsWith('bearer ')) {
-    throw new Error('Invalid AuthHeader Format');
-  }
-
   const token = getToken(authHeader)
   const clientSecret = (await getSecret())[auth0SecretField];
 
   return verify(token, clientSecret) as JwtPayload;
-}
-
-function getToken(authHeader: string): string {
-  if (!authHeader) throw new Error('No authentication header')
-
-  if (!authHeader.toLowerCase().startsWith('bearer '))
-    throw new Error('Invalid authentication header')
-
-  const split = authHeader.split(' ')
-  const token = split[1]
-
-  return token
 }
 
 async function getSecret() {
