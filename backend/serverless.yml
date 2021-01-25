@@ -14,19 +14,29 @@ provider:
     TODO_TABLE: todo-${self:provider.stage}
     S3_BUCKET: todo-${self:provider.stage}-866937819247
     BUCKET_MAX_AGE: 3000
+    AUTH0_SECRET_ID: Auth0Secret-${self:provider.stage}
+    AUTH0_SECRET_FIELD: auth0SecretField
 
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:Scan
         - dynamodb:PutItem
-      Resource: 
+      Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
     - Effect: Allow
       Action:
         - s3:PutObject
         - s3:GetObject
-      Resource: 'arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*'
+      Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
+    - Effect: Allow
+      Action:
+        - secretsmanager:GetSecretValue
+      Resource: !Ref Auth0Secret
+    - Effect: Allow
+      Action:
+        - kms:Decrypt
+      Resource: !GetAtt KMSKey.Arn
 
 functions:
   # Auth:
@@ -84,7 +94,7 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: todoId
-            KeyType: HASH 
+            KeyType: HASH
 
     S3Bucket:
       Type: AWS::S3::Bucket
@@ -99,9 +109,9 @@ resources:
                 - PUT
                 - HEAD
               AllowedOrigins:
-                - '*'
+                - "*"
               AllowedHeaders:
-                - '*'
+                - "*"
               MaxAge: ${self:provider.environment.BUCKET_MAX_AGE}
 
     BucketPolicy:
@@ -109,10 +119,44 @@ resources:
       Properties:
         Bucket: !Ref S3Bucket
         PolicyDocument:
-            Id: todoS3BucketPolicy
-            Statement:
-              - Sid: PublicReadForGetBucketObjects
-                Effect: Allow
-                Principal: '*'
-                Action: 's3:GetObject'
-                Resource: 'arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*'
+          Id: todoS3BucketPolicy
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: "*"
+              Action: "s3:GetObject"
+              Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
+    
+    KMSKey:
+      Type: AWS::KMS::Key
+      Properties:
+        Description: Key to encrypt Auth0 secret
+        KeyPolicy:
+          Version: '2012-10-17'
+          Id: key-default-1
+          Statement:
+            - Sid: Allow administration of the key
+              Effect: Allow
+              Principal:
+                AWS:
+                  Fn::Join:
+                  - ':'
+                  - - 'arn:aws:iam:'
+                    - Ref: AWS::AccountId
+                    - 'root'
+              Action:
+                - 'kms:*'
+              Resource: '*'
+    
+    KMSAlias:
+      Type: AWS::KMS::Alias
+      Properties:
+        AliasName: alias/auth0Key-${self:provider.stage}
+        TargetKeyId: !Ref KMSKey
+    
+    Auth0Secret:
+      Type: AWS::SecretsManager::Secret 
+      Properties:
+        Name: ${self:provider.environment.AUTH0_SECRET_ID}
+        Description: Auth0 Secret
+        KmsKeyId: !Ref KMSKey
