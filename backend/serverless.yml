@@ -12,23 +12,32 @@ provider:
   region: ${opt:region, 'us-east-2'}
   environment:
     TODO_TABLE: todo-${self:provider.stage}
+    TODO_INDEX: todo-index
     S3_BUCKET: todo-${self:provider.stage}-866937819247
     BUCKET_MAX_AGE: 3000
     AUTH0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH0_SECRET_FIELD: auth0SecretField
 
   iamRoleStatements:
+    # DynamoDb Statements
     - Effect: Allow
       Action:
         - dynamodb:Scan
         - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:Query
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_INDEX}
+
+    # S3 Statements
     - Effect: Allow
       Action:
         - s3:PutObject
         - s3:GetObject
       Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
+
+    #KMS Statements
     - Effect: Allow
       Action:
         - secretsmanager:GetSecretValue
@@ -42,7 +51,6 @@ functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  # TODO: Configure this function
   GetTodos:
     handler: src/lambda/http/getTodos.handler
     events:
@@ -50,7 +58,6 @@ functions:
           method: get
           path: todos
 
-  # TODO: Configure this function
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
     events:
@@ -59,7 +66,6 @@ functions:
           path: todos
           authorizer: Auth
 
-  # TODO: Configure this function
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
     events:
@@ -67,7 +73,6 @@ functions:
           method: patch
           path: todos/{todoId}
 
-  # TODO: Configure this function
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
     events:
@@ -75,7 +80,6 @@ functions:
           method: delete
           path: todos/{todoId}
 
-  # TODO: Configure this function
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
     events:
@@ -91,11 +95,25 @@ resources:
         TableName: ${self:provider.environment.TODO_TABLE}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
-          - AttributeName: todoId
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: createdAt
             AttributeType: S
         KeySchema:
-          - AttributeName: todoId
+          - AttributeName: userId
             KeyType: HASH
+          - AttributeName: createdAt
+            KeyType: RANGE
+        LocalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.TODO_INDEX}
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
 
     S3Bucket:
       Type: AWS::S3::Bucket

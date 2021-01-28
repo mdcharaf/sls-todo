@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
-import { getToken, getUserIdFromToken} from '../../auth/utils'
+import { getUserIdFromToken} from '../../auth/utils'
 import * as uuid from 'uuid';
 import * as AWS from 'aws-sdk';
 import Response from '../../models/response'
@@ -28,7 +28,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   await dbContext.put({
     TableName: todoTableName,
     Item: item
-  });
+  }).promise();
 
   return Response.created(item);
 }

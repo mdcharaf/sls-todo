@@ -10,7 +10,7 @@ const logger = createLogger('auth')
 const auth0SecretId = process.env.AUTH0_SECRET_ID;
 const auth0SecretField = process.env.AUTH0_SECRET_FIELD;
 const secretsManager = new AWS.SecretsManager();
-let cachedSecret: string;
+let clientSecret = 'QWrtRmGpVjtCCeQts6LdWzAFoU5-ov2maBD_tvAp0cFMysXjOmKz4K2AAjz3mKDj'; // tmp for the sake of not calling rmeote ssm
 
 export const handler = async (
   event: APIGatewayTokenAuthorizerEvent
@@ -53,17 +53,11 @@ export const handler = async (
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const token = getToken(authHeader)
-  const clientSecret = (await getSecret())[auth0SecretField];
-
   return verify(token, clientSecret) as JwtPayload;
 }
 
+// Opted for now
 async function getSecret() {
-  if (cachedSecret) 
-    return cachedSecret;
-
   const data = await secretsManager.getSecretValue( { SecretId: auth0SecretId }).promise();
-  cachedSecret = data.SecretString;
-
-  return JSON.parse(cachedSecret);
+  return JSON.parse(data.SecretString);
 }

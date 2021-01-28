@@ -13,5 +13,8 @@ export default {
   },
   error(message) {
     return this.makeResponse(422, { message });
+  },
+  notFound(message) {
+    return this.makeResponse(404, { message });
   }
 }
