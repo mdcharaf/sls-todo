@@ -5,10 +5,10 @@ export default {
       body: JSON.stringify(data)
     }
   },
-  created(data) {
+  created(data = {}) {
     return this.makeResponse(201, data);
   },
-  success(data) {
+  success(data = {}) {
     return this.makeResponse(200, data);
   },
   error(message) {
