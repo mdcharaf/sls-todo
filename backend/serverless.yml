@@ -50,6 +50,11 @@ functions:
         Action:
           - s3:GetObject
         Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
+      - Effect: Allow
+        Action: 
+          - cloudwatch:PutMetricData
+        Resource:
+          - '*'
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
@@ -65,6 +70,11 @@ functions:
         Resource:
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
           - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_INDEX}
+      - Effect: Allow
+        Action: 
+          - cloudwatch:PutMetricData
+        Resource:
+          - '*'
 
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
@@ -85,6 +95,11 @@ functions:
           - s3:GetObject
           - s3:PutObject
         Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
+      - Effect: Allow
+        Action: 
+          - cloudwatch:PutMetricData
+        Resource:
+          - '*'
 
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
@@ -105,6 +120,11 @@ functions:
           - s3:GetObject
           - s3:PutObject
         Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
+      - Effect: Allow
+        Action: 
+          - cloudwatch:PutMetricData
+        Resource:
+          - '*'
 
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
@@ -118,6 +138,11 @@ functions:
           - s3:GetObject
           - s3:PutObject
         Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
+      - Effect: Allow
+        Action: 
+          - cloudwatch:PutMetricData
+        Resource:
+          - '*'
 
 resources:
   Resources:
