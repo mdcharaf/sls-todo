@@ -4,6 +4,7 @@ import { TodoItem } from "../models/TodoItem";
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest';
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid';
+import * as AWS from 'aws-sdk'
 
 const logger = createLogger('TodoService')
 
@@ -12,13 +13,16 @@ export interface ITodoService {
   updateTodoItem(request: UpdateTodoRequest, todoId: string, userId: string): Promise<TodoItem>;
   getTodosByUserId(userId: string): Promise<TodoItem[]>;
   deleteTodoItem(todoId: string, userId: string): Promise<boolean>;
+  createAttachementPresignedUrl(todoId: string, bucket: string): string;
 }
 
 class TodoService implements ITodoService {
   private readonly repo: ITodoRepoistory;
+  private readonly s3: AWS.S3;
 
   constructor(repo: ITodoRepoistory) {
     this.repo = repo;
+    this.s3 = new AWS.S3({ signatureVersion: 'v4' });
   }
 
   async createTodoItem(request: CreateTodoRequest, userId: string): Promise<TodoItem> {
@@ -75,6 +79,16 @@ class TodoService implements ITodoService {
 
   async getTodosByUserId(userId: string): Promise<TodoItem[]> {
     return await this.repo.getByUserId(userId);
+  }
+
+  createAttachementPresignedUrl(todoId: string, bucket: string): string {
+    const presignedUrl = this.s3.getSignedUrl('putObject', {
+      Bucket: bucket,
+      Key: todoId,
+      Expires: 300
+    });
+
+    return presignedUrl;
   }
 }
 

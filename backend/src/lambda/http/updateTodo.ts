@@ -3,9 +3,14 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } f
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import { createTodoService, ITodoService } from "../../services/TodoService";
 import { getUserIdFromToken } from '../../auth/utils'
-import response from '../response';
+import { createCloudWatchService, ICloudWatchService } from "../../services/cloudwatchService";
+import response from '../response'
+
+const cloudWatchService: ICloudWatchService = createCloudWatchService();
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  console.log('Processing Event', event);
+  await cloudWatchService.recordRequestsCount();
 
   try {
     const todoId = event.pathParameters.todoId;
