@@ -16,5 +16,8 @@ export default {
   },
   notFound(message) {
     return this.makeResponse(404, { message });
+  },
+  badRequest(message) {
+    return this.makeResponse(400, { message })
   }
 }

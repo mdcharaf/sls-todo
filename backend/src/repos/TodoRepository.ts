@@ -1,15 +1,19 @@
 import * as AWS from 'aws-sdk';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { createLogger } from '../utils/logger'
 import { TodoItem } from "../models/TodoItem";
 
 const AWSXRay = require('aws-xray-sdk');
 const XAWS = AWSXRay.captureAWS(AWS);
+const logger = createLogger('TodoRepo');
 
 export interface ITodoRepoistory {
   create(item: TodoItem): Promise<TodoItem>;
   update(item: TodoItem): Promise<TodoItem>;
-  delete(todoId: string, userId: string):Promise<boolean>;
+  delete(todoId: string, userId: string): Promise<boolean>;
   getByUserId(userId: string): Promise<TodoItem[]>;
+  get(userId: string, todoId: string): Promise<TodoItem>;
+  exists(userId: string, todoId: string): Promise<boolean>;
 }
 
 export class TodoRepository implements ITodoRepoistory {
@@ -65,6 +69,26 @@ export class TodoRepository implements ITodoRepoistory {
     }).promise();
 
     return true;
+  }
+
+  async get(userId: string, todoId: string): Promise<TodoItem> {
+    logger.info('Start Get by partition key');
+    const result = await this.dbClient.get({
+      TableName: this.tableName,
+      Key: {
+        'userId': userId,
+        'todoId': todoId
+      }
+    }).promise();
+
+    logger.info('Get by partition key', result);
+    return result.Item as TodoItem;
+  }
+
+  async exists(userId: string, todoId: string): Promise<boolean> {
+    const item: TodoItem =  await this.get(userId, todoId);
+
+    return item?.todoId !== null && item?.todoId !== undefined;
   }
 
   async getByUserId(userId: string): Promise<TodoItem[]> {

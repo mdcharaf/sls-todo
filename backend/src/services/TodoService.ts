@@ -22,8 +22,14 @@ class TodoService implements ITodoService {
   }
 
   async createTodoItem(request: CreateTodoRequest, userId: string): Promise<TodoItem> {
-    const todoId = uuid.v4();
+    if (!request.name) {
+      throw new Error('Missing todo name');
+    }
+    if (isNaN(Date.parse(request.dueDate))) {
+      throw new Error('Invalid Date Format');
+    }
 
+    const todoId = uuid.v4();
     const item: TodoItem = {
       todoId,
       createdAt: (new Date()).toISOString(),
@@ -35,10 +41,14 @@ class TodoService implements ITodoService {
     };
 
     logger.info('Todo item created', { item });
-    return this.repo.create(item);
+    return await this.repo.create(item);
   }
 
   async updateTodoItem(request: UpdateTodoRequest, todoId: string, userId: string): Promise<TodoItem> {
+    if (!(await this.repo.exists(userId, todoId))) {
+      throw new Error('Record not found');
+    }
+
     const item: TodoItem = {
       todoId,
       createdAt: (new Date()).toISOString(),
@@ -48,18 +58,23 @@ class TodoService implements ITodoService {
       userId: userId
     };
 
+    await this.repo.update(item);
     logger.info('Todo item updated', { item });
-    return this.repo.update(item);
+    return item;
   }
 
   async deleteTodoItem(todoId: string, userId: string): Promise<boolean> {
-    this.repo.delete(todoId, userId);
+    if (!(await this.repo.exists(userId, todoId))) {
+      throw new Error('Record not found');
+    }
+
+    await this.repo.delete(todoId, userId);
     logger.info('Todo item deleted', { todoId });
     return true;
   }
 
   async getTodosByUserId(userId: string): Promise<TodoItem[]> {
-    return this.repo.getByUserId(userId);
+    return await this.repo.getByUserId(userId);
   }
 }
 
