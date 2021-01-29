@@ -1,8 +1,11 @@
 import { ITodoRepoistory, TodoRepository } from "../repos/TodoRepository";
 import { CreateTodoRequest } from "../requests/CreateTodoRequest";
 import { TodoItem } from "../models/TodoItem";
-import * as uuid from 'uuid';
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest';
+import { createLogger } from '../utils/logger'
+import * as uuid from 'uuid';
+
+const logger = createLogger('TodoService')
 
 export interface ITodoService {
   createTodoItem(request: CreateTodoRequest, userId: string): Promise<TodoItem>;
@@ -31,6 +34,7 @@ class TodoService implements ITodoService {
       userId
     };
 
+    logger.info('Todo item created', { item });
     return this.repo.create(item);
   }
 
@@ -44,11 +48,14 @@ class TodoService implements ITodoService {
       userId: userId
     };
 
+    logger.info('Todo item updated', { item });
     return this.repo.update(item);
   }
 
   async deleteTodoItem(todoId: string, userId: string): Promise<boolean> {
-    return this.repo.delete(todoId, userId);
+    this.repo.delete(todoId, userId);
+    logger.info('Todo item deleted', { todoId });
+    return true;
   }
 
   async getTodosByUserId(userId: string): Promise<TodoItem[]> {

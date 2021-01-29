@@ -1,5 +1,9 @@
 import * as AWS from 'aws-sdk';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from "../models/TodoItem";
+
+const AWSXRay = require('aws-xray-sdk');
+const XAWS = AWSXRay.captureAWS(AWS);
 
 export interface ITodoRepoistory {
   create(item: TodoItem): Promise<TodoItem>;
@@ -10,12 +14,12 @@ export interface ITodoRepoistory {
 
 export class TodoRepository implements ITodoRepoistory {
   private readonly tableName: string;
-  private readonly dbClient: AWS.DynamoDB.DocumentClient;
+  private readonly dbClient: DocumentClient;
   private readonly todoIndexName: string;
 
   constructor() {
     this.tableName = process.env.TODO_TABLE;
-    this.dbClient = new AWS.DynamoDB.DocumentClient();
+    this.dbClient = new XAWS.DynamoDB.DocumentClient();
     this.todoIndexName = process.env.TODO_INDEX;
   }
 
