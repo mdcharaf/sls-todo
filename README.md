@@ -2,19 +2,6 @@
 # Functionality of the application
 
 This application will allow creating/removing/updating/fetching TODO items. Each TODO item can optionally have an attachment image. Each user only has access to TODO items that he/she has created.
-
-# TODO items
-
-The application should store TODO items, and each TODO item contains the following fields:
-
-* `todoId` (string) - a unique id for an item
-* `createdAt` (string) - date and time when an item was created
-* `name` (string) - name of a TODO item (e.g. "Change a light bulb")
-* `dueDate` (string) - date and time by which an item should be completed
-* `done` (boolean) - true if an item was completed, false otherwise
-* `attachmentUrl` (string) (optional) - a URL pointing to an image attached to a TODO item
-
-
 # Service Information
 
 * service: serverless-todo-app
@@ -22,21 +9,19 @@ The application should store TODO items, and each TODO item contains the followi
 * region: us-east-2
 * stack: serverless-todo-app-dev
 * resources: 53
-* api keys:
-  ** None
 * endpoints:
-  ** GET - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos
-  ** POST - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos
-  ** PATCH - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos/{todoId}
-  ** DELETE - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos/{todoId}
-  ** POST - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos/{todoId}/attachment
+  * GET - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos
+  * POST - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos
+  * PATCH - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos/{todoId}
+  * DELETE - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos/{todoId}
+  * POST - https://{apiId}.execute-api.us-east-2.amazonaws.com/dev/todos/{todoId}/attachment
 * functions:
-  ** Auth: serverless-todo-app-dev-Auth
-  ** GetTodos: serverless-todo-app-dev-GetTodos
-  ** CreateTodo: serverless-todo-app-dev-CreateTodo
-  ** UpdateTodo: serverless-todo-app-dev-UpdateTodo
-  ** DeleteTodo: serverless-todo-app-dev-DeleteTodo
-  ** GenerateUploadUrl: serverless-todo-app-dev-GenerateUploadUrl
+  * Auth: serverless-todo-app-dev-Auth
+  * GetTodos: serverless-todo-app-dev-GetTodos
+  * CreateTodo: serverless-todo-app-dev-CreateTodo
+  * UpdateTodo: serverless-todo-app-dev-UpdateTodo
+  * DeleteTodo: serverless-todo-app-dev-DeleteTodo
+  * GenerateUploadUrl: serverless-todo-app-dev-GenerateUploadUrl
 # Frontend
 
 The `client` folder contains a web application that can use the API that should be developed in the project.
