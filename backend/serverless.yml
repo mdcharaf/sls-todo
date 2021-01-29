@@ -7,9 +7,11 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
-
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-2'}
+  tracing:
+    lambda: true
+    apiGateway: true
   environment:
     TODO_TABLE: todo-${self:provider.stage}
     TODO_INDEX: todo-index
@@ -17,7 +19,7 @@ provider:
     BUCKET_MAX_AGE: 3000
     AUTH0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH0_SECRET_FIELD: auth0SecretField
-    
+
 functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
