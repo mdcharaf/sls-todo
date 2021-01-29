@@ -16,7 +16,7 @@ provider:
     TODO_TABLE: todo-${self:provider.stage}
     TODO_INDEX: todo-index
     S3_BUCKET: todo-${self:provider.stage}-866937819247
-    S3_BUCKET_URL: https://${self:provider.environment.S3_BUCKET}.s3.${self:provider.region}.amazonaws.com/
+    S3_BUCKET_URL: https://${self:provider.environment.S3_BUCKET}.s3.amazonaws.com
     BUCKET_MAX_AGE: 3000
     AUTH0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH0_SECRET_FIELD: auth0SecretField
@@ -78,6 +78,11 @@ functions:
           - cloudwatch:PutMetricData
         Resource:
           - '*'
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
 
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler

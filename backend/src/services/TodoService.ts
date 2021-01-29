@@ -34,13 +34,14 @@ class TodoService implements ITodoService {
     }
 
     const todoId = uuid.v4();
+    const bucketUrl = process.env.S3_BUCKET_URL;
     const item: TodoItem = {
       todoId,
       createdAt: (new Date()).toISOString(),
       name: request.name,
       dueDate: request.dueDate,
       done: false,
-      attachmentUrl: request.attachmentUrl,
+      attachmentUrl: `${bucketUrl}/${todoId}`,
       userId
     };
 
@@ -59,7 +60,7 @@ class TodoService implements ITodoService {
       name: request.name,
       dueDate: request.dueDate,
       done: request.done,
-      userId: userId
+      userId: userId,
     };
 
     await this.repo.update(item);
