@@ -49,7 +49,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       const dueDate = this.calculateDueDate()
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
-        dueDate
+        dueDate,
+        done: false
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
@@ -165,7 +166,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               <Grid.Column width={1} verticalAlign="middle">
                 <Checkbox
                   onChange={() => this.onTodoCheck(pos)}
-                  checked={todo.done}
+                  checked={todo.hasOwnProperty('done') && todo.done}
                 />
               </Grid.Column>
               <Grid.Column width={10} verticalAlign="middle">
