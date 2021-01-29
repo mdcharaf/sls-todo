@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 import * as AWS from 'aws-sdk'
-import Response from '../../models/response';
+import Response from '../response';
 
 const bucketName = process.env.S3_BUCKET;
 const s3 = new AWS.S3({
