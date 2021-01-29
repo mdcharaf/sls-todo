@@ -7,6 +7,7 @@ import { UpdateTodoRequest } from '../requests/UpdateTodoRequest';
 export interface ITodoService {
   createTodoItem(request: CreateTodoRequest, userId: string): Promise<TodoItem>;
   updateTodoItem(request: UpdateTodoRequest, todoId: string, userId: string): Promise<TodoItem>;
+  getTodosByUserId(userId: string): Promise<TodoItem[]>;
 }
 
 class TodoService implements ITodoService {
