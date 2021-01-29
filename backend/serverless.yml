@@ -17,36 +17,19 @@ provider:
     BUCKET_MAX_AGE: 3000
     AUTH0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH0_SECRET_FIELD: auth0SecretField
-
-  iamRoleStatements:
-    # DynamoDb Statements
-    - Effect: Allow
-      Action:
-        - '*'
-      Resource:
-        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
-        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_INDEX}
-
-    # S3 Statements
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-      Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
-
-    #KMS Statements
-    - Effect: Allow
-      Action:
-        - secretsmanager:GetSecretValue
-      Resource: !Ref Auth0Secret
-    - Effect: Allow
-      Action:
-        - kms:Decrypt
-      Resource: !GetAtt KMSKey.Arn
-
+    
 functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource: !Ref Auth0Secret
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !GetAtt KMSKey.Arn
 
   GetTodos:
     handler: src/lambda/http/getTodos.handler
@@ -54,6 +37,17 @@ functions:
       - http:
           method: get
           path: todos
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - '*'
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_INDEX}
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
@@ -62,6 +56,13 @@ functions:
           method: post
           path: todos
           authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - '*'
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_INDEX}
 
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
@@ -70,6 +71,18 @@ functions:
           method: patch
           authorizer: Auth
           path: todos/{todoId}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - '*'
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_INDEX}
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
 
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
@@ -78,6 +91,18 @@ functions:
           method: delete
           authorizer: Auth
           path: todos/{todoId}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - '*'
+        Resource:
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+          - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/${self:provider.environment.TODO_INDEX}
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
 
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
@@ -85,6 +110,12 @@ functions:
       - http:
           method: post
           path: todos/{todoId}/attachment
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource: "arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*"
 
 resources:
   Resources:
