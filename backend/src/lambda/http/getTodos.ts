@@ -15,11 +15,6 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const userId = getUserIdFromToken(event.headers.Authorization);
   const todoService: ITodoService = createTodoService();
 
-  const result: TodoItem[] = await todoService.getTodosByUserId(userId);
-
-    if (result.length > 0) {
-      return response.success(result);
-    }
-
-    return response.notFound("User don't have any todos");
+  const items: TodoItem[] = await todoService.getTodosByUserId(userId);
+  return response.success({ items });
 }

@@ -2,6 +2,9 @@ export default {
   makeResponse(statusCode, data) {
     return {
       statusCode,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
       body: JSON.stringify(data)
     }
   },
@@ -14,8 +17,8 @@ export default {
   error(message) {
     return this.makeResponse(422, { message });
   },
-  notFound(message) {
-    return this.makeResponse(404, { message });
+  notFound(data = {}) {
+    return this.makeResponse(404, data);
   },
   badRequest(message) {
     return this.makeResponse(400, { message })
