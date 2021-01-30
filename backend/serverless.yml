@@ -66,6 +66,9 @@ functions:
           path: todos
           authorizer: Auth
           cors: true
+          request:
+            schema:
+              application/json: ${file(src/requests/schema/create-todo-request.json)}
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -92,6 +95,9 @@ functions:
           authorizer: Auth
           path: todos/{todoId}
           cors: true
+          request:
+            schema:
+              application/json: ${file(src/requests/schema/update-todo-request.json)}
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -247,3 +253,12 @@ resources:
         Name: ${self:provider.environment.AUTH0_SECRET_ID}
         Description: Auth0 Secret
         KmsKeyId: !Ref KMSKey
+    
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-body-validator'
+        RestApiId: 
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
