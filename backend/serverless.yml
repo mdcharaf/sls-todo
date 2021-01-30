@@ -195,7 +195,6 @@ resources:
                 - DELETE
                 - PUT
                 - HEAD
-                - PATCH
               AllowedOrigins:
                 - "*"
               AllowedHeaders:

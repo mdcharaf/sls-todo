@@ -19,9 +19,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const userId = getUserIdFromToken(token);
     const todoService: ITodoService = createTodoService();
 
-    const result = await todoService.updateTodoItem(updatedTodo, todoId, userId);
+    const item = await todoService.updateTodoItem(updatedTodo, todoId, userId);
 
-    return response.success(result);
+    return response.success({ item });
   } catch (error) {
     return response.badRequest(error.message);
   }
